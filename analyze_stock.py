@@ -35,34 +35,35 @@ for number, result_stock in enumerate(result_sort, start=1):
 
 data = dict((['順位',rank_list],['銘柄',stock_list],['利回り',dividends_list])) #辞書型に変更
 print(data)
-
-# three%_yield =[]
-
-# for x in stock_list:
-#    three%_yield = df[df["Ticker"] == stock_list(x)]
-
 data_tabel = pd.DataFrame(data) #表に変換
-
 data_tabel.to_csv("pandas_output.csv",index=False, encoding="utf-8-sig") #CSV保存
 
-five_moving_average_line = df["Close"].rolling(window=5).mean()
-tf_moving_average_line = df["Close"].rolling(window=25).mean()
+#利回り3％以上の株のCloseを取得
+filltered_df = df[df["Ticker"].isin(stock_list)]
+close_data_df = filltered_df.pivot(index="Date",columns="Ticker",values="Close") #銘柄ごとに列を分ける
 
-df["MA5"] = five_moving_average_line #dfにMA5の5日平均値を追加
-df["MA25"] = tf_moving_average_line #dfにMA25の25日平均値を追加
-print(df.tail(10))
+stock_table = pd.DataFrame(close_data_df)
+stock_table.to_csv("close_out.csv", index=False, encoding="utf-8-sig")
 
-df["Close"].plot(label="closing price") #終値の折れ線グラフを表示
-df["MA5"].plot(label="5-day moving average")
-df["MA25"].plot(label="25-day moving average")
+print(close_data_df)
 
+#株コードそれぞれの終値をグラフにする
+for i in stock_list:
+    five_moving_average_line = close_data_df[i].rolling(window=5).mean()
+    close_data_df[i + "_MA5"] = five_moving_average_line #dfにMA5の5日平均値を追加
 
+    tf_moving_average_line = close_data_df[i].rolling(window=25).mean()
+    close_data_df[i + "_MA25"] = tf_moving_average_line #dfにMA25の25日平均値を追加
 
-plt.legend()#折れ線グラフの説明の表示
+    close_data_df[i].plot(label=i + "_closing price") #終値の折れ線グラフを表示
+    close_data_df[i + "_MA5"].plot(label=i + "_5-day moving average")
+    close_data_df[i + "_MA25"].plot(label=i + "_25-day moving average")
 
-plt.xlabel("Date")
-plt.ylabel("Price")
-# グラフを画像ファイルとして保存する
-plt.tight_layout()
-plt.savefig("stock_chart.png")
-plt.close()
+    plt.legend()#折れ線グラフの説明の表示
+    plt.xlabel(i + "_Date")    
+    plt.ylabel(i + "_Price")
+    
+    # グラフを画像ファイルとして保存する
+    plt.tight_layout()
+    plt.savefig(i + "_stock_chart.png")
+    plt.close()
