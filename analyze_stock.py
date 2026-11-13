@@ -1,6 +1,7 @@
 import pandas as pd
 import matplotlib.pyplot as plt
 import download_stock as ds
+from pathlib import Path
 
 df = pd.read_csv("stock_data.csv")
 #print(df.columns) #Divedends(配当金)の列があるかを確認
@@ -65,5 +66,7 @@ for i in stock_list:
     
     # グラフを画像ファイルとして保存する
     plt.tight_layout()
-    plt.savefig(i + "_stock_chart.png")
+    chart_dir = Path("chart_image") #画像の保存先ファイルの作成
+    chart_dir.mkdir(exist_ok=True) #保存先のフォルダが存在するかの確認
+    plt.savefig( chart_dir / f"{i}_stock_chart.png")
     plt.close()
